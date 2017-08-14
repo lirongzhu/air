@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd"
+       default-lazy-init="true">
+       
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+    	<property name="securityManager" ref="securityManager"/>
+    	<property name="loginUrl" value="/relogin.do"/>
+    	<property name="successUrl" value="/index.do"/>
+    	<property name="unauthorizedUrl" value="/unauthorized.do"/> 
+    	
+        <property name="filterChainDefinitions">
+            <value>
+                /*/*.do = user
+                /resf/*/*.do = user
+            </value>
+        </property>
+	</bean>
+
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realms">
+			<list>
+                <ref bean="authcRealm"/>
+            </list>
+		</property>
+	    <property name="cacheManager" ref="shiroEhcacheManager"/>
+        <property name="rememberMeManager" ref="rememberMeManager"/>
+	</bean>
+
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+	<bean id="authcRealm" class="com.wing.shrio.realm.AuthcRealm">
+		<property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+                <property name="hashAlgorithmName" value="MD5"/>
+                <property name="hashIterations" value="5"/>
+            </bean>
+        </property>
+	</bean>
+	
+	    <!-- 用户授权信息Cache, 采用EhCache -->
+    <bean id="shiroEhcacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:ehcache-shiro.xml"/>
+    </bean>
+    <!--rememberMe管理器 -->
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cookie" ref="rememberMeCookie"/>
+    </bean>
+    <bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="rememberMeClub"/>
+        <property name="httpOnly" value="true"/>
+        <property name="maxAge" value="25920000"/>
+    </bean>
+	
+</beans>

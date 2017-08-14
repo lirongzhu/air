@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache>
+	<diskStore path="java.io.tmpdir/crm/ehcache-spring" />
+	<defaultCache 
+	   maxEntriesLocalHeap="1000" 
+	   eternal="false" 
+	   timeToLiveSeconds="120" 
+	   overflowToDisk="false" 
+	   memoryStoreEvictionPolicy="FIFO"/>
+	   
+	<cache name="countITourismVisitor"
+        maxEntriesLocalHeap="1000" 
+        eternal="false" 
+        timeToLiveSeconds="7200" 
+        overflowToDisk="false" 
+        memoryStoreEvictionPolicy="FIFO"/>	
+        
+    <cache name="countRouteVisitor"
+        maxEntriesLocalHeap="1000" 
+        eternal="false" 
+        timeToLiveSeconds="7200" 
+        overflowToDisk="false" 
+        memoryStoreEvictionPolicy="FIFO"/>  
+</ehcache>

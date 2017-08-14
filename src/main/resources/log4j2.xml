@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+	
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
+		</Console>
+		<RollingFile name="RollingFile" fileName="system_logs/info.log" filePattern="system_logs/info-%d{yyyy-MM-dd}.log">
+    		<PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss} %c{1}:%L  [%thread] %m%n"/>
+    		<Policies>
+    			<TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+    		</Policies>
+    	</RollingFile>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="DEBUG">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="RollingFile" />
+		</Root>
+		<logger name="org.springframework" level="INFO"></logger>
+        <logger name="org.hibernate" level="INFO"></logger>
+        <logger name="org.hibernate.SQL" level="DEBUG"></logger>
+        <logger name="com.wing" level="INFO">
+        <logger name="net.sf.ehcache" level="DEBUG"></logger>
+        </logger>
+	</Loggers>
+</Configuration>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+      http://www.springframework.org/schema/context  
+      http://www.springframework.org/schema/context/spring-context.xsd  
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+      http://www.springframework.org/schema/tx
+	  http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+      http://www.springframework.org/schema/mvc  
+      http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+      http://www.springframework.org/schema/data/jpa
+      http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+	
+	<!-- 属性文件读入 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>/WEB-INF/properties/dataSource.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="dataSourceTemplate" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+         <property name="driverClassName" value="${jdbc.driverClass}" />
+         <property name="url" value="${jdbc.url}" />
+         <property name="username" value="${jdbc.username}" />
+         <property name="password" value="${jdbc.password}" />
+    </bean>
+ 
+	<!-- 数据源定义,使用dbcp数据源 -->
+	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close" autowire="no">
+	 	<property name="dataSource" ref="dataSourceTemplate"/>
+        <property name="maxActive" value="${jdbc.maxActive}"/>
+        <property name="maxIdle" value="${jdbc.maxIdle}"/>
+        <property name="defaultAutoCommit" value="false"/>
+        <property name="timeBetweenEvictionRunsMillis" value="3600000"/>
+        <property name="minEvictableIdleTimeMillis" value="3600000"/>
+        <property name="validationQuery" value="select 1"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="validationInterval" value="300000"/>
+	</bean>
+	
+	<!-- JdbcTemplate -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">  
+	    <property name="dataSource" ref="dataSource" />  
+	</bean> 
+	<!-- JdbcTemplate -->
+	
+	<!-- HibernateTemplate -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">  
+        <property name="dataSource" ref="dataSource" />  
+        <property name="hibernateProperties">  
+            <props>  
+                <prop key="hibernate.show_sql">${jdbc.showSql}</prop>  
+                <prop key="hibernate.hbm2ddl.auto">${jdbc.hbm2ddlAuto}</prop>  
+            </props>  
+        </property>  
+        <property name="packagesToScan" value="com.wing.bean"/>
+    </bean>  
+  
+   <!-- hibernate模板 -->  
+    <bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">  
+        <property name="sessionFactory" ref="sessionFactory" />  
+    </bean>
+    <!-- HibernateTemplate -->
+	
+	<!-- JPA实体管理工厂的配置 -->
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="com.wing.bean"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">${jdbc.dialect}</prop>
+                <prop key="hibernate.show_sql">${jdbc.showSql}</prop>
+                <prop key="hibernate.hbm2ddl.auto">${jdbc.hbm2ddlAuto}</prop>
+                <prop key="database">${jdbc.database}</prop>
+            </props>
+        </property>
+    </bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean> 
+      
+    <tx:annotation-driven transaction-manager="transactionManager" /> 
+     
+    <!-- 重要配置：启用扫描并自动创建代理的功能  -->
+    <jpa:repositories base-package="com.wing.dao"  
+    	transaction-manager-ref="transactionManager" entity-manager-factory-ref="entityManagerFactory"/>
+    
+    <!-- Hibernate对Jpa的实现 -->
+    <bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+    
+    <aop:aspectj-autoproxy />
+    
+</beans>
